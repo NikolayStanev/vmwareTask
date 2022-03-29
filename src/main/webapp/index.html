@@ -1,0 +1,87 @@
+<!-- The top of file index.html -->
+<html itemscope itemtype="http://schema.org/Article">
+    <head>
+        <!-- BEGIN Pre-requisites -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+        </script>
+        <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+        </script>
+        <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+        <!-- END Pre-requisites -->
+        <!-- Continuing the <head> section -->
+        <script>
+            function start() {
+                gapi.load('auth2', function() {
+                    auth2 = gapi.auth2.init({
+                        client_id: '611662143661-4lpkmpb5k7tibno7ivksiqqtbsglrbkc.apps.googleusercontent.com',
+                        // Scopes to request in addition to 'profile' and 'email'
+                        //scope: 'additional_scope'
+                    });
+                });
+            }
+        </script>
+    </head>
+    <style>
+        .all{
+            margin-top: 20%;
+            display: flex;
+            justify-content: center;
+        }
+        #answer{
+            margin-top: 20%;
+            display: none;
+            justify-content: center;
+        }
+    </style>
+    <body>
+
+        <div id="main">
+            <div class="all" id="signinButton">Sign in with Google</div>
+            <div id="answer">Please add <span style="color: crimson">'Google-id-token'</span> as a header with value: </div>
+        </div>
+
+        <script>
+            $('#signinButton').click(function() {
+                // signInCallback defined in step 6.
+                auth2.grantOfflineAccess().then(signInCallback);
+            });
+
+            function signInCallback(authResult) {
+                if (authResult['code']) {
+
+                    // Hide the sign-in button now that the user is authorized, for example:
+                    $('#signinButton').attr('style', 'display: none');
+                    // Send the code to the server
+                    $.ajax({
+                        type: 'POST',
+                        url: 'rest/auth/signIn',
+                        contentType: 'application/octet-stream; charset=utf-8',
+                        dataType: 'text',
+                        success: function (result) {
+                            // Handle or verify the server response.
+                            $('#answer').attr('style', 'display: flex');
+                            document.getElementById("answer").insertAdjacentText("afterend", result)
+
+                        },
+                        processData: false,
+                        data: authResult['code']
+                    });
+                } else {
+                    alert("Sorry could not log in!")
+                }
+            }
+
+            function renderButton() {
+                gapi.signin2.render('signinButton', {
+                    'scope': 'profile email',
+                    'width': 240,
+                    'height': 50,
+                    'longtitle': true,
+                    'theme': 'dark',
+                });
+            }
+        </script>
+
+    <!-- ... -->
+    </body>
+</html>
